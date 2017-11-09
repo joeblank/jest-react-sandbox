@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import fns from './utils/functions';
 import './App.css';
 
 
@@ -23,28 +23,22 @@ class App extends Component {
   }
 
   componentDidMount() {
-    axios.get('/api/cars').then( data => {
+    fns.getCars('/api/cars').then( res => {
       this.setState({
-        cars: data.data
+        cars: res
       })
     })
   }
 
   filterCarsById() {
-    console.log('running')
-    const car = this.state.cars.filter( car => {
-      return car.id === parseInt(this.input.value)
-    })
-    console.log(car)
+   const car = fns.filterById(this.state.cars, this.input.value)
     this.setState({
       carById: car
     })
   }
 
   filterByColor(e) {
-    const cars = this.state.cars.filter( car => {
-      return car.color === e.target.value
-    })
+    const cars = fns.filterByColor(this.state.cars, e.target.value)
     this.setState({
       carsByColor: cars
     })
@@ -52,33 +46,18 @@ class App extends Component {
 
   randomNum() {
     this.setState({
-      randomNum: Math.floor(Math.random() * 10) + 1
+      randomNum: fns.genRandomNum()
     })
   }
 
   battle() {
-    console.log('running')
     let elfHealth = parseInt(this.elfH.value);
     let elfAttack = parseInt(this.elfA.value);
     let orcAttack = parseInt(this.orcA.value);
     let orcHealth = parseInt(this.orcH.value);
-    while(elfHealth > 0 || orcHealth > 0) {
-      console.log('elf', elfHealth, 'orc', orcHealth)
-      orcHealth -= elfAttack;
-      if (orcHealth<= 0) {
-        this.setState({
-          winner: 'Elf'
-        })
-        return;
-      }
-      elfHealth -= orcAttack;
-      if (elfHealth <= 0) {
-        this.setState({
-          winner: 'Orc'
-        })
-        return;
-      }
-    }
+
+    let result = fns.findWinner(elfHealth, elfAttack, orcHealth, orcAttack)
+    this.setState({winner: result})
   }
   
   toggleCheck() {
@@ -132,9 +111,9 @@ class App extends Component {
         <p>Random number: {this.state.randomNum}</p>
         <hr />
         <h1>Battle</h1>
-        <p>Elf atttack: <input ref={(elfA)=> this.elfA = elfA} type='number'/></p>
+        <p>Elf attack: <input ref={(elfA)=> this.elfA = elfA} type='number'/></p>
         <p>Elf health: <input ref={(elfH)=> this.elfH = elfH} type='number'/></p>
-        <p>Orc atttack: <input ref={(orcA)=> this.orcA = orcA} type='number'/></p>
+        <p>Orc attack: <input ref={(orcA)=> this.orcA = orcA} type='number'/></p>
         <p>Orc health: <input ref={(orcH)=> this.orcH = orcH} type='number'/></p>
         <button onClick={this.battle}>Attack</button>
         <p>Result: {this.state.winner}</p>
